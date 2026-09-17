@@ -1,0 +1,226 @@
+[
+  {
+    "id": "pm-kisan",
+    "name": "PM-KISAN Samman Nidhi",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "benefit": "Direct income support paid straight into your bank account in three equal instalments each year.",
+    "benefitAmount": "₹6,000 per year",
+    "predicates": [
+      { "field": "occupation", "in": ["farmer"] },
+      { "field": "landHectares", "max": 2 }
+    ],
+    "documents": ["Aadhaar card", "Land records (khatauni / RoR)", "Bank account passbook"],
+    "applyUrl": "https://pmkisan.gov.in/",
+    "sourceUrl": "https://pmkisan.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmjay",
+    "name": "Ayushman Bharat PM-JAY",
+    "ministry": "Ministry of Health & Family Welfare",
+    "benefit": "Cashless hospital treatment at empanelled government and private hospitals for your whole family.",
+    "benefitAmount": "₹5,00,000 per family per year",
+    "predicates": [
+      { "field": "annualIncome", "max": 250000 }
+    ],
+    "documents": ["Aadhaar card", "Ration card", "SECC / eligibility slip"],
+    "applyUrl": "https://pmjay.gov.in/",
+    "sourceUrl": "https://pmjay.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmay-gramin",
+    "name": "Pradhan Mantri Awas Yojana - Gramin",
+    "ministry": "Ministry of Rural Development",
+    "benefit": "Financial assistance to build a permanent house if you currently live in a kutcha or damaged home.",
+    "benefitAmount": "₹1,20,000 (₹1,30,000 in hilly areas)",
+    "predicates": [
+      { "field": "isRural", "eq": true },
+      { "field": "annualIncome", "max": 300000 }
+    ],
+    "documents": ["Aadhaar card", "Bank account passbook", "MGNREGA job card", "SECC listing"],
+    "applyUrl": "https://pmayg.nic.in/",
+    "sourceUrl": "https://pmayg.nic.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmay-urban",
+    "name": "Pradhan Mantri Awas Yojana - Urban",
+    "ministry": "Ministry of Housing & Urban Affairs",
+    "benefit": "Interest subsidy on a home loan for buying or building your first house in a town or city.",
+    "benefitAmount": "Up to ₹2,67,000 interest subsidy",
+    "predicates": [
+      { "field": "isRural", "eq": false },
+      { "field": "annualIncome", "max": 600000 }
+    ],
+    "documents": ["Aadhaar card", "Income certificate", "Property documents", "Bank loan sanction letter"],
+    "applyUrl": "https://pmay-urban.gov.in/",
+    "sourceUrl": "https://pmay-urban.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "sukanya-samriddhi",
+    "name": "Sukanya Samriddhi Yojana",
+    "ministry": "Ministry of Finance",
+    "benefit": "A high-interest savings account for a girl child, with tax-free returns at maturity.",
+    "benefitAmount": "8.2% annual interest, tax free",
+    "predicates": [
+      { "field": "gender", "eq": "female" },
+      { "field": "age", "max": 10 }
+    ],
+    "documents": ["Birth certificate of the girl child", "Guardian Aadhaar and PAN", "Address proof"],
+    "applyUrl": "https://www.indiapost.gov.in/",
+    "sourceUrl": "https://www.nsiindia.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "ujjwala",
+    "name": "Pradhan Mantri Ujjwala Yojana",
+    "ministry": "Ministry of Petroleum & Natural Gas",
+    "benefit": "A free LPG gas connection with the deposit waived, so you no longer have to cook on firewood.",
+    "benefitAmount": "Free connection + ₹1,600 deposit waiver",
+    "predicates": [
+      { "field": "gender", "eq": "female" },
+      { "field": "age", "min": 18 },
+      { "field": "annualIncome", "max": 200000 }
+    ],
+    "documents": ["Aadhaar card", "Ration card", "Bank account passbook", "BPL certificate"],
+    "applyUrl": "https://www.pmuy.gov.in/",
+    "sourceUrl": "https://www.pmuy.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "mudra",
+    "name": "Pradhan Mantri MUDRA Yojana",
+    "ministry": "Ministry of Finance",
+    "benefit": "A collateral-free business loan to start or grow a small non-farm enterprise.",
+    "benefitAmount": "Up to ₹20,00,000",
+    "predicates": [
+      { "field": "age", "min": 18 },
+      { "field": "occupation", "in": ["self_employed", "unemployed", "labourer", "other"] }
+    ],
+    "documents": ["Aadhaar card", "PAN card", "Business plan or quotation", "Bank statements"],
+    "applyUrl": "https://www.mudra.org.in/",
+    "sourceUrl": "https://www.mudra.org.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "nsp-post-matric",
+    "name": "Post-Matric Scholarship (SC/ST/OBC)",
+    "ministry": "Ministry of Social Justice & Empowerment",
+    "benefit": "Covers tuition fees plus a monthly maintenance allowance for studies after Class 10.",
+    "benefitAmount": "Full tuition + up to ₹1,200 per month",
+    "predicates": [
+      { "field": "occupation", "in": ["student"] },
+      { "field": "category", "in": ["sc", "st", "obc"] },
+      { "field": "annualIncome", "max": 250000 }
+    ],
+    "documents": ["Caste certificate", "Income certificate", "Previous marksheet", "Bank passbook", "Aadhaar card"],
+    "applyUrl": "https://scholarships.gov.in/",
+    "sourceUrl": "https://scholarships.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "atal-pension",
+    "name": "Atal Pension Yojana",
+    "ministry": "Ministry of Finance",
+    "benefit": "A guaranteed monthly pension after you turn 60, funded by small monthly contributions now.",
+    "benefitAmount": "₹1,000 to ₹5,000 per month after 60",
+    "predicates": [
+      { "field": "age", "min": 18, "max": 40 }
+    ],
+    "documents": ["Aadhaar card", "Savings bank account", "Mobile number"],
+    "applyUrl": "https://www.npscra.nsdl.co.in/scheme-details.php",
+    "sourceUrl": "https://www.npscra.nsdl.co.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmsby",
+    "name": "PM Suraksha Bima Yojana",
+    "ministry": "Ministry of Finance",
+    "benefit": "Accident insurance cover for death or permanent disability, at a premium of ₹20 a year.",
+    "benefitAmount": "₹2,00,000 cover for ₹20 per year",
+    "predicates": [
+      { "field": "age", "min": 18, "max": 70 }
+    ],
+    "documents": ["Aadhaar card", "Savings bank account", "Consent form at your bank"],
+    "applyUrl": "https://jansuraksha.gov.in/",
+    "sourceUrl": "https://jansuraksha.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmjjby",
+    "name": "PM Jeevan Jyoti Bima Yojana",
+    "ministry": "Ministry of Finance",
+    "benefit": "Life insurance cover for your family, at a premium of ₹436 a year.",
+    "benefitAmount": "₹2,00,000 life cover",
+    "predicates": [
+      { "field": "age", "min": 18, "max": 50 }
+    ],
+    "documents": ["Aadhaar card", "Savings bank account", "Nominee details"],
+    "applyUrl": "https://jansuraksha.gov.in/",
+    "sourceUrl": "https://jansuraksha.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pmmvy",
+    "name": "PM Matru Vandana Yojana",
+    "ministry": "Ministry of Women & Child Development",
+    "benefit": "Cash support during pregnancy for your first living child, to make up for lost wages.",
+    "benefitAmount": "₹5,000 in instalments",
+    "predicates": [
+      { "field": "gender", "eq": "female" },
+      { "field": "age", "min": 19 },
+      { "field": "annualIncome", "max": 800000 }
+    ],
+    "documents": ["Aadhaar card", "MCP card", "Bank account passbook", "Aadhaar of husband"],
+    "applyUrl": "https://pmmvy.wcd.gov.in/",
+    "sourceUrl": "https://pmmvy.wcd.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "stand-up-india",
+    "name": "Stand-Up India",
+    "ministry": "Ministry of Finance",
+    "benefit": "A bank loan to set up a new manufacturing, services or trading business.",
+    "benefitAmount": "₹10,00,000 to ₹1,00,00,000",
+    "predicates": [
+      { "field": "age", "min": 18 },
+      { "field": "category", "in": ["sc", "st"] }
+    ],
+    "documents": ["Aadhaar card", "PAN card", "Caste certificate", "Project report", "Business address proof"],
+    "applyUrl": "https://www.standupmitra.in/",
+    "sourceUrl": "https://www.standupmitra.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "pm-vishwakarma",
+    "name": "PM Vishwakarma Yojana",
+    "ministry": "Ministry of Micro, Small & Medium Enterprises",
+    "benefit": "Skill training with a daily stipend, a toolkit grant, and a collateral-free loan for traditional artisans.",
+    "benefitAmount": "₹15,000 toolkit grant + loans up to ₹3,00,000",
+    "predicates": [
+      { "field": "age", "min": 18 },
+      { "field": "occupation", "in": ["self_employed", "labourer", "other"] }
+    ],
+    "documents": ["Aadhaar card", "Bank account passbook", "Ration card", "Proof of trade"],
+    "applyUrl": "https://pmvishwakarma.gov.in/",
+    "sourceUrl": "https://pmvishwakarma.gov.in/",
+    "verifiedOn": null
+  },
+  {
+    "id": "nsap-old-age",
+    "name": "Indira Gandhi National Old Age Pension",
+    "ministry": "Ministry of Rural Development",
+    "benefit": "A monthly pension paid to elderly people from below-poverty-line households.",
+    "benefitAmount": "₹200 to ₹500 per month",
+    "predicates": [
+      { "field": "age", "min": 60 },
+      { "field": "annualIncome", "max": 100000 }
+    ],
+    "documents": ["Aadhaar card", "Age proof", "BPL certificate", "Bank account passbook"],
+    "applyUrl": "https://nsap.nic.in/",
+    "sourceUrl": "https://nsap.nic.in/",
+    "verifiedOn": null
+  }
+]

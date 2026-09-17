@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f5f1;
+  --surface: #ffffff;
+  --foreground: #1c1b18;
+  --muted: #62605a;
+  --border: #e2dfd6;
+  --accent: #0e6b4d;
+  --accent-foreground: #ffffff;
+  --danger: #a3261d;
+
+  --eligible: #0e6b4d;
+  --eligible-bg: #e5f2ec;
+  --near: #8a5a00;
+  --near-bg: #fbf1dc;
+  --info: #1d4f91;
+  --info-bg: #e7eef8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121311;
+    --surface: #1b1c1a;
+    --foreground: #ecebe6;
+    --muted: #a5a39b;
+    --border: #33342f;
+    --accent: #4fbf94;
+    --accent-foreground: #0b1a13;
+    --danger: #f08a80;
+
+    --eligible: #4fbf94;
+    --eligible-bg: #15271f;
+    --near: #e3b35a;
+    --near-bg: #2a2214;
+    --info: #86aee6;
+    --info-bg: #17202d;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-eligible: var(--eligible);
+  --color-eligible-bg: var(--eligible-bg);
+  --color-near: var(--near);
+  --color-near-bg: var(--near-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --font-sans: var(--font-noto-sans), var(--font-noto-devanagari), system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Saved PDFs are always black on white, whatever theme the screen was in. */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}

@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MatchStatus {
+  eligible
+  needs_info
+  near_miss
+  ineligible
+}
+
+/// Authored in data/schemes.json and loaded by `npm run seed`. Edit the JSON,
+/// not these rows: the seed validates every entry before writing.
+model Scheme {
+  id            String    @id
+  name          String
+  ministry      String
+  benefit       String
+  benefitAmount String?
+  /// Predicate[] from @saathi/core. JSON because predicates are a
+  /// discriminated union; core's zod schema owns and validates the shape.
+  predicates    Json
+  documents     String[]
+  applyUrl      String
+  sourceUrl     String
+  /// null = not yet checked against the official portal. The UI badges these.
+  verifiedOn    DateTime? @db.Date
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  results MatchResult[]
+}
+
+/// One visitor, anonymous: no name, email or password. Created only after the
+/// visitor agrees to the consent notice. Deleting it deletes everything below
+/// it (sessions, profiles, runs): that is what "Delete my data" does.
+model User {
+  id          String   @id @default(cuid())
+  /// When the consent notice was accepted. Required: no consent, no user.
+  consentedAt DateTime
+  /// Preferred language code chosen on the welcome step, e.g. "hi".
+  language    String   @default("en")
+  createdAt   DateTime @default(now())
+
+  sessions Session[]
+  profiles Profile[]
+}
+
+/// A device's login. The cookie holds a random token; only its SHA-256 hash is
+/// stored, so a leaked database row cannot be replayed as a session.
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// A person being checked for. One user can hold several: "Me", "Mother"...
+/// Enum-like columns are plain strings on purpose: @saathi/core's zod schema
+/// is the one authority on valid values, so there is no second enum to drift.
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String   @default("Me")
+  phone         String?  @unique
+  age           Int?
+  gender        String?
+  state         String?
+  annualIncome  Int?
+  category      String?
+  occupation    String?
+  landHectares  Float?
+  isRural       Boolean?
+  hasDisability Boolean?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  runs MatchRun[]
+
+  @@index([userId])
+}
+
+/// The audit log. One row per evaluation of a profile against the catalogue.
+/// The app never edits a decision. The only deletion is the user's own
+/// "Delete my data", which cascades here: their right to erasure outranks
+/// keeping the trail.
+model MatchRun {
+  id        String   @id @default(cuid())
+  /// Always set by the app. Optional only because runs recorded before user
+  /// accounts existed have none; such runs belong to nobody and are unreadable.
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  /// The profile exactly as evaluated — copied, not referenced. If the Profile
+  /// row is edited later, this record must still show what the decision saw.
+  snapshot  Json
+  language  String
+  /// The AI explanation, saved once generated, so reopening results costs no
+  /// AI quota. Tied to `explanationLanguage`; a different language regenerates.
+  explanation         Json?
+  explanationLanguage String?
+  createdAt DateTime @default(now())
+
+  results MatchResult[]
+
+  @@index([createdAt])
+}
+
+model MatchResult {
+  id       String      @id @default(cuid())
+  runId    String
+  run      MatchRun    @relation(fields: [runId], references: [id], onDelete: Cascade)
+  schemeId String
+  /// Restrict: a scheme that past decisions reference cannot be silently
+  /// deleted out from under the audit trail.
+  scheme   Scheme      @relation(fields: [schemeId], references: [id], onDelete: Restrict)
+  status   MatchStatus
+  /// Check[] — the rule-by-rule trace, including each predicate as it stood
+  /// at decision time. Rules can change later; this record will not.
+  checks   Json
+
+  @@index([runId])
+  @@index([schemeId, status])
+}
