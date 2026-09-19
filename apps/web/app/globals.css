@@ -56,6 +56,31 @@
   --font-sans: var(--font-noto-sans), var(--font-noto-devanagari), system-ui, sans-serif;
 }
 
+/* Results fade in when they replace the "not checked yet" list. */
+@theme {
+  --animate-appear: appear 0.35s ease-out;
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Hides the scroll bar but keeps scrolling (wheel, touchpad, touch, keyboard). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
