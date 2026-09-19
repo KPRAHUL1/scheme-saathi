@@ -2,7 +2,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { EMPTY_PROFILE, mergeProfile, type Profile, type ProfileField } from '@saathi/core'
+import { EMPTY_PROFILE, mergeProfile, type Profile, type ProfileField, type Scheme } from '@saathi/core'
 import {
   api, ApiError, type Account, type ClientProfile, type ExplainResponse, type MatchItem, type MatchResponse,
 } from '@/lib/api'
@@ -13,6 +13,7 @@ import { DownloadIcon, MicIcon } from './icons'
 import { ProfileForm } from './profile-form'
 import { ProgressSteps, type Step, type StepState } from './progress-steps'
 import { ResultCard } from './result-card'
+import { SchemeCatalogue } from './scheme-catalogue'
 import { DeleteDataDialog } from './delete-data-dialog'
 import { QuickProfile } from './quick-profile'
 import { SpeakButton } from './speak-button'
@@ -49,6 +50,8 @@ const languageName = (code: string) => {
 
 export type InitialState = {
   account: Account
+  /** Every scheme, shown as "not checked yet" before the first result. */
+  catalogue: Scheme[]
   activeProfileId: string
   result: MatchResponse | null
   explanation: ExplainResponse | null
@@ -87,6 +90,8 @@ export function Saathi({ initial }: { initial: InitialState }) {
   // A brand-new person starts with simple step-by-step questions, not a blank chat box.
   const [asking, setAsking] = useState(() => !initial.result && isBlank(profile))
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // Phones show one panel at a time; wide screens show both side by side.
+  const [tab, setTab] = useState<'chat' | 'schemes'>('chat')
   const [newLabel, setNewLabel] = useState('')
   // The newest run. A slow explanation for an older run must not overwrite it.
   const currentRun = useRef<string | null>(initial.result?.runId ?? null)
@@ -136,10 +141,13 @@ export function Saathi({ initial }: { initial: InitialState }) {
       language: lang,
     })
     try {
+      const firstResult = !result
       const res = await api.match(profileId, next, lang)
       currentRun.current = res.runId
       setResult(res)
       setExplanation(null)
+      // On a phone, jump to the list the first time there are results to see.
+      if (firstResult && window.matchMedia('(max-width: 1023.98px)').matches) setTab('schemes')
       setProfiles((ps) => ps.map((p) => (p.id === profileId ? { ...p, profile: next, latestRunId: res.runId } : p)))
       setProgress((p) => p && { ...p, steps: { ...p.steps, check: 'done', explain: 'active' }, activeSince: timestamp() })
       void explain(res.runId, lang)
@@ -219,7 +227,9 @@ export function Saathi({ initial }: { initial: InitialState }) {
     setShowForm(false)
     setInput('')
     setProgress(null)
-    setAsking(!target.latestRunId && isBlank(target.profile))
+    const newPerson = !target.latestRunId && isBlank(target.profile)
+    setAsking(newPerson)
+    if (newPerson) setTab('chat')
     if (!target.latestRunId) return
 
     try {
@@ -284,349 +294,381 @@ export function Saathi({ initial }: { initial: InitialState }) {
     : []
 
   return (
-    <div className="flex flex-col gap-6">
-      <section
-        aria-label="Who you are checking for"
-        className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-surface px-4 py-3"
-      >
-        <label htmlFor="person" className="text-sm text-muted">Checking for</label>
-        <select
-          id="person"
-          value={activeId}
-          disabled={busy}
-          onChange={(e) => {
-            const target = profiles.find((p) => p.id === e.target.value)
-            if (target) void switchProfile(target)
-          }}
-          className="rounded-lg border border-border bg-background px-3 py-1.5 font-medium disabled:opacity-50"
+    <div className="pb-24 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start lg:gap-8 lg:pb-0">
+      {/* Left: talking to the app. On phones only one of the two panels shows. */}
+      <div className={`flex flex-col gap-6 ${tab === 'schemes' ? 'max-lg:hidden' : ''}`}>
+        <section
+          aria-label="Who you are checking for"
+          className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-surface px-4 py-3"
         >
-          {profiles.map((p) => (
-            <option key={p.id} value={p.id}>{p.label}</option>
-          ))}
-        </select>
-        {!adding ? (
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
+          <label htmlFor="person" className="text-sm text-muted">Checking for</label>
+          <select
+            id="person"
+            value={activeId}
             disabled={busy}
-            className="text-sm text-accent underline disabled:opacity-50"
-          >
-            + Add family member
-          </button>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              void addProfile(newLabel)
+            onChange={(e) => {
+              const target = profiles.find((p) => p.id === e.target.value)
+              if (target) void switchProfile(target)
             }}
-            className="flex w-full flex-wrap items-center gap-2"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 font-medium disabled:opacity-50"
           >
-            <label htmlFor="new-person" className="sr-only">Who is this for?</label>
-            <input
-              id="new-person"
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="e.g. Mother"
-              maxLength={40}
-              className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-1.5"
-            />
-            <button
-              type="submit"
-              disabled={!newLabel.trim()}
-              className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground disabled:opacity-50"
-            >
-              Add
-            </button>
+            {profiles.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+          {!adding ? (
             <button
               type="button"
-              onClick={() => {
-                setAdding(false)
-                setNewLabel('')
-              }}
-              className="rounded-lg border border-border px-4 py-1.5 text-sm"
-            >
-              Cancel
-            </button>
-          </form>
-        )}
-      </section>
-
-      {asking ? (
-        <QuickProfile
-          key={activeId}
-          initial={profile}
-          lang={uiLang}
-          speaker={speaker}
-          onDone={(p) => {
-            setAsking(false)
-            void check(p)
-          }}
-          onSkip={() => setAsking(false)}
-        />
-      ) : (
-      <>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          void send(input)
-        }}
-        className="flex flex-col gap-3"
-      >
-        <label htmlFor="message" className="sr-only">Tell us about yourself</label>
-        <textarea
-          id="message"
-          rows={3}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              void send(input)
-            }
-          }}
-          placeholder={
-            recorder.state !== 'idle'
-              ? 'Recording… tap Send when you have finished speaking'
-              : nextQuestion
-                ? `${QUESTIONS[nextQuestion.field]} (any language)`
-                : 'In any language: your age, where you live, your work, family income…'
-          }
-          className="w-full resize-y rounded-2xl border border-border bg-surface p-4 text-base leading-relaxed focus:outline-2 focus:outline-accent"
-        />
-        {recorder.state === 'idle' ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="submit"
-              disabled={!!busy || !input.trim()}
-              className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
-            >
-              {result ? 'Send' : 'Find my schemes'}
-            </button>
-            {recorder.supported && (
-              <button
-                type="button"
-                onClick={() => void recorder.start()}
-                disabled={busy}
-                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 hover:border-accent disabled:opacity-50"
-              >
-                <MicIcon />
-                Speak
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowForm((s) => !s)}
-              className="rounded-lg border border-border px-4 py-2.5 hover:bg-surface"
-            >
-              {showForm ? 'Hide form' : 'Fill a form instead'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false)
-                setAsking(true)
-              }}
+              onClick={() => setAdding(true)}
               disabled={busy}
-              className="rounded-lg border border-border px-4 py-2.5 hover:bg-surface disabled:opacity-50"
+              className="text-sm text-accent underline disabled:opacity-50"
             >
-              Answer step by step
+              + Add family member
             </button>
-          </div>
-        ) : (
-          <div
-            role="status"
-            className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-danger/50 bg-surface px-4 py-3"
-          >
-            <span className="size-3 shrink-0 animate-pulse rounded-full bg-danger" aria-hidden />
-            <span className="font-semibold tabular-nums">
-              {recorder.state === 'recording'
-                ? `Recording ${Math.floor(recorder.seconds / 60)}:${String(recorder.seconds % 60).padStart(2, '0')}`
-                : 'Preparing…'}
-            </span>
-            <span className="text-sm text-muted">Speak in any language · up to 1 minute</span>
-            <div className="ml-auto flex gap-2">
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void addProfile(newLabel)
+              }}
+              className="flex w-full flex-wrap items-center gap-2"
+            >
+              <label htmlFor="new-person" className="sr-only">Who is this for?</label>
+              <input
+                id="new-person"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="e.g. Mother"
+                maxLength={40}
+                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-1.5"
+              />
+              <button
+                type="submit"
+                disabled={!newLabel.trim()}
+                className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground disabled:opacity-50"
+              >
+                Add
+              </button>
               <button
                 type="button"
-                onClick={recorder.cancel}
-                disabled={recorder.state !== 'recording'}
-                className="rounded-lg border border-border px-4 py-2 disabled:opacity-50"
+                onClick={() => {
+                  setAdding(false)
+                  setNewLabel('')
+                }}
+                className="rounded-lg border border-border px-4 py-1.5 text-sm"
               >
                 Cancel
               </button>
+            </form>
+          )}
+        </section>
+
+        {asking ? (
+          <QuickProfile
+            key={activeId}
+            initial={profile}
+            lang={uiLang}
+            speaker={speaker}
+            onDone={(p) => {
+              setAsking(false)
+              void check(p)
+            }}
+            onSkip={() => setAsking(false)}
+          />
+        ) : (
+        <>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void send(input)
+          }}
+          className="flex flex-col gap-3"
+        >
+          <label htmlFor="message" className="sr-only">Tell us about yourself</label>
+          <textarea
+            id="message"
+            rows={3}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void send(input)
+              }
+            }}
+            placeholder={
+              recorder.state !== 'idle'
+                ? 'Recording… tap Send when you have finished speaking'
+                : nextQuestion
+                  ? `${QUESTIONS[nextQuestion.field]} (any language)`
+                  : 'In any language: your age, where you live, your work, family income…'
+            }
+            className="w-full resize-y rounded-2xl border border-border bg-surface p-4 text-base leading-relaxed focus:outline-2 focus:outline-accent"
+          />
+          {recorder.state === 'idle' ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                disabled={!!busy || !input.trim()}
+                className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
+              >
+                {result ? 'Send' : 'Find my schemes'}
+              </button>
+              {recorder.supported && (
+                <button
+                  type="button"
+                  onClick={() => void recorder.start()}
+                  disabled={busy}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 hover:border-accent disabled:opacity-50"
+                >
+                  <MicIcon />
+                  Speak
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => void recorder.finish()}
-                disabled={recorder.state !== 'recording'}
-                className="rounded-lg bg-accent px-5 py-2 font-medium text-accent-foreground disabled:opacity-50"
+                onClick={() => setShowForm((s) => !s)}
+                className="rounded-lg border border-border px-4 py-2.5 hover:bg-surface"
               >
-                Send
+                {showForm ? 'Hide form' : 'Fill a form instead'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false)
+                  setAsking(true)
+                }}
+                disabled={busy}
+                className="rounded-lg border border-border px-4 py-2.5 hover:bg-surface disabled:opacity-50"
+              >
+                Answer step by step
               </button>
             </div>
-          </div>
-        )}
-      </form>
-
-      {/* Demo examples for judges, tucked away so real users see their own options first. */}
-      {!result && !busy && (
-        <details className="text-sm">
-          <summary className="cursor-pointer text-muted">Try an example</summary>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {EXAMPLES.map((ex) => (
-              <button
-                key={ex.label}
-                type="button"
-                onClick={() => void send(ex.text)}
-                className="rounded-full border border-border bg-surface px-4 py-1.5 hover:border-accent"
-              >
-                {ex.label}
-              </button>
-            ))}
-          </div>
-        </details>
-      )}
-      </>
-      )}
-
-      <div aria-live="polite" className="flex flex-col gap-3">
-        {recorder.error && (
-          <p role="alert" className="rounded-lg border border-danger/30 bg-surface px-4 py-3 text-danger">
-            {recorder.error}
-          </p>
-        )}
-        {progress && <ProgressSteps steps={steps} activeSince={progress.activeSince} />}
-        {notice && (
-          <p role="alert" className="rounded-lg border border-danger/30 bg-surface px-4 py-3 text-danger">
-            {notice}
-          </p>
-        )}
-      </div>
-
-      {lastMessage && (
-        <p className="self-end max-w-[85%] rounded-2xl rounded-br-sm bg-accent px-4 py-2.5 text-accent-foreground">
-          {lastMessage}
-        </p>
-      )}
-
-      {known.length > 0 && (
-        <section aria-labelledby="understood">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 id="understood" className="font-semibold">What we understood</h2>
-            <button type="button" onClick={() => setShowForm(true)} className="text-sm text-accent underline">
-              Edit
-            </button>
-          </div>
-          <ul className="flex flex-wrap gap-2">
-            {known.map((f) => (
-              <li key={f} className="rounded-full border border-border bg-surface px-3 py-1 text-sm">
-                <span className="text-muted">{FIELD_LABELS[f]}:</span> {formatValue(f, profile[f]!)}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {showForm && (
-        <ProfileForm
-          key={JSON.stringify(profile)}
-          initial={profile}
-          onSubmit={(p) => void check(p)}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
-
-      {result && nextQuestion && (
-        <section className="rounded-2xl border border-info/30 bg-info-bg p-5">
-          <p className="font-medium">{QUESTIONS[nextQuestion.field]}</p>
-          <p className="mt-1 text-sm text-muted">
-            Answering this lets us check {nextQuestion.unlocks} more{' '}
-            {nextQuestion.unlocks === 1 ? 'scheme' : 'schemes'}.
-          </p>
-          {replies ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {replies.map((r) => (
+          ) : (
+            <div
+              role="status"
+              className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-danger/50 bg-surface px-4 py-3"
+            >
+              <span className="size-3 shrink-0 animate-pulse rounded-full bg-danger" aria-hidden />
+              <span className="font-semibold tabular-nums">
+                {recorder.state === 'recording'
+                  ? `Recording ${Math.floor(recorder.seconds / 60)}:${String(recorder.seconds % 60).padStart(2, '0')}`
+                  : 'Preparing…'}
+              </span>
+              <span className="text-sm text-muted">Speak in any language · up to 1 minute</span>
+              <div className="ml-auto flex gap-2">
                 <button
-                  key={r.label}
                   type="button"
-                  disabled={!!busy}
-                  onClick={() => void check(mergeProfile(profile, r.patch))}
-                  className="rounded-full border border-info/40 bg-surface px-4 py-1.5 text-sm hover:border-info disabled:opacity-50"
+                  onClick={recorder.cancel}
+                  disabled={recorder.state !== 'recording'}
+                  className="rounded-lg border border-border px-4 py-2 disabled:opacity-50"
                 >
-                  {r.label}
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void recorder.finish()}
+                  disabled={recorder.state !== 'recording'}
+                  className="rounded-lg bg-accent px-5 py-2 font-medium text-accent-foreground disabled:opacity-50"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          )}
+        </form>
+
+        {/* Demo examples for judges, tucked away so real users see their own options first. */}
+        {!result && !busy && (
+          <details className="text-sm">
+            <summary className="cursor-pointer text-muted">Try an example</summary>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex.label}
+                  type="button"
+                  onClick={() => void send(ex.text)}
+                  className="rounded-full border border-border bg-surface px-4 py-1.5 hover:border-accent"
+                >
+                  {ex.label}
                 </button>
               ))}
             </div>
-          ) : (
-            <p className="mt-2 text-sm">Type your answer in the box above, in any language.</p>
+          </details>
+        )}
+        </>
+        )}
+
+        <div aria-live="polite" className="flex flex-col gap-3">
+          {recorder.error && (
+            <p role="alert" className="rounded-lg border border-danger/30 bg-surface px-4 py-3 text-danger">
+              {recorder.error}
+            </p>
           )}
-        </section>
-      )}
-
-      {result && (
-        <section aria-labelledby="results" className="flex flex-col gap-6">
-          <div>
-            <h2 id="results" className="text-2xl font-bold">
-              {eligible.length > 0
-                ? `You may qualify for ${eligible.length} ${eligible.length === 1 ? 'scheme' : 'schemes'}`
-                : 'No confirmed matches yet'}
-            </h2>
-            {explanation?.intro && (
-              <div className="mt-2 flex flex-col items-start gap-2">
-                <p className="leading-relaxed" lang={explanation.language}>{explanation.intro}</p>
-                <SpeakButton id="intro" text={explanation.intro} lang={explanation.language} speaker={speaker} />
-              </div>
-            )}
-            {explainFailed && (
-              <p className="mt-2 text-sm text-muted">
-                We couldn&apos;t write the explanation in your language right now, so results are shown in English.
-                The eligibility results are not affected.
-              </p>
-            )}
-            {/* Hidden while explaining, so the saved document gets the translated text. */}
-            {!explaining && (
-              <a
-                href={`/results/${result.runId}`}
-                target="_blank"
-                rel="noopener"
-                className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 font-medium hover:border-accent"
-              >
-                <DownloadIcon />
-                Download my schemes (PDF)
-              </a>
-            )}
-          </div>
-
-          <Group title="You qualify" items={eligible} {...{ explainedById, explaining, language, speaker }} />
-          <Group title="One more detail needed" items={byStatus('needs_info')} {...{ explainedById, explaining, language, speaker }} />
-          <Group title="Close, worth checking" items={byStatus('near_miss')} {...{ explainedById, explaining, language, speaker }} />
-
-          <StateSchemesCard state={profile.state} lang={uiLang} />
-
-          {ineligible.length > 0 && (
-            <details className="rounded-2xl border border-border bg-surface p-5">
-              <summary className="cursor-pointer font-medium">Not eligible ({ineligible.length})</summary>
-              <ul className="mt-3 flex flex-col gap-2 text-sm">
-                {ineligible.map((m) => (
-                  <li key={m.scheme.id}>
-                    <strong>{m.scheme.name}:</strong> {m.failed.map(describeCheck).join(' ')}
-                  </li>
-                ))}
-              </ul>
-            </details>
+          {progress && <ProgressSteps steps={steps} activeSince={progress.activeSince} />}
+          {notice && (
+            <p role="alert" className="rounded-lg border border-danger/30 bg-surface px-4 py-3 text-danger">
+              {notice}
+            </p>
           )}
+        </div>
 
-          <p className="text-xs text-muted">
-            Results are based on published eligibility rules, which can change. Always confirm on the official
-            website before applying. Scheme Saathi is not a government service.
+        {lastMessage && (
+          <p className="self-end max-w-[85%] rounded-2xl rounded-br-sm bg-accent px-4 py-2.5 text-accent-foreground">
+            {lastMessage}
           </p>
-        </section>
-      )}
+        )}
 
-      <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-muted">
-        <p>Your details are saved securely and linked to this device.</p>
-        <button type="button" onClick={() => setConfirmingDelete(true)} className="text-danger underline">
-          Delete my data
-        </button>
-      </footer>
+        {known.length > 0 && (
+          <section aria-labelledby="understood">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 id="understood" className="font-semibold">What we understood</h2>
+              <button type="button" onClick={() => setShowForm(true)} className="text-sm text-accent underline">
+                Edit
+              </button>
+            </div>
+            <ul className="flex flex-wrap gap-2">
+              {known.map((f) => (
+                <li key={f} className="rounded-full border border-border bg-surface px-3 py-1 text-sm">
+                  <span className="text-muted">{FIELD_LABELS[f]}:</span> {formatValue(f, profile[f]!)}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {showForm && (
+          <ProfileForm
+            key={JSON.stringify(profile)}
+            initial={profile}
+            onSubmit={(p) => void check(p)}
+            onCancel={() => setShowForm(false)}
+          />
+        )}
+
+        {result && nextQuestion && (
+          <section className="rounded-2xl border border-info/30 bg-info-bg p-5">
+            <p className="font-medium">{QUESTIONS[nextQuestion.field]}</p>
+            <p className="mt-1 text-sm text-muted">
+              Answering this lets us check {nextQuestion.unlocks} more{' '}
+              {nextQuestion.unlocks === 1 ? 'scheme' : 'schemes'}.
+            </p>
+            {replies ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {replies.map((r) => (
+                  <button
+                    key={r.label}
+                    type="button"
+                    disabled={!!busy}
+                    onClick={() => void check(mergeProfile(profile, r.patch))}
+                    className="rounded-full border border-info/40 bg-surface px-4 py-1.5 text-sm hover:border-info disabled:opacity-50"
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm">Type your answer in the box above, in any language.</p>
+            )}
+          </section>
+        )}
+
+        <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-muted">
+          <p>Your details are saved securely and linked to this device.</p>
+          <button type="button" onClick={() => setConfirmingDelete(true)} className="text-danger underline">
+            Delete my data
+          </button>
+        </footer>
+      </div>
+
+      {/* Right: every scheme, kept in view on wide screens while the left side scrolls. */}
+      <aside
+        aria-label="Schemes"
+        className={`flex flex-col gap-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto no-scrollbar ${
+          tab === 'chat' ? 'max-lg:hidden' : ''
+        }`}
+      >
+        {result ? (
+          // Keyed by run, so each new result replays the fade-in.
+          <section key={result.runId} aria-labelledby="results" className="flex animate-appear flex-col gap-6 motion-reduce:animate-none">
+            <div>
+              <h2 id="results" className="text-2xl font-bold">
+                {eligible.length > 0
+                  ? `You may qualify for ${eligible.length} ${eligible.length === 1 ? 'scheme' : 'schemes'}`
+                  : 'No confirmed matches yet'}
+              </h2>
+              {explanation?.intro && (
+                <div className="mt-2 flex flex-col items-start gap-2">
+                  <p className="leading-relaxed" lang={explanation.language}>{explanation.intro}</p>
+                  <SpeakButton id="intro" text={explanation.intro} lang={explanation.language} speaker={speaker} />
+                </div>
+              )}
+              {explainFailed && (
+                <p className="mt-2 text-sm text-muted">
+                  We couldn&apos;t write the explanation in your language right now, so results are shown in English.
+                  The eligibility results are not affected.
+                </p>
+              )}
+              {/* Hidden while explaining, so the saved document gets the translated text. */}
+              {!explaining && (
+                <a
+                  href={`/results/${result.runId}`}
+                  target="_blank"
+                  rel="noopener"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 font-medium hover:border-accent"
+                >
+                  <DownloadIcon />
+                  Download my schemes (PDF)
+                </a>
+              )}
+            </div>
+
+            <Group title="You qualify" items={eligible} {...{ explainedById, explaining, language, speaker }} />
+            <Group title="One more detail needed" items={byStatus('needs_info')} {...{ explainedById, explaining, language, speaker }} />
+            <Group title="Close, worth checking" items={byStatus('near_miss')} {...{ explainedById, explaining, language, speaker }} />
+
+            <StateSchemesCard state={profile.state} lang={uiLang} />
+
+            {ineligible.length > 0 && (
+              <details className="rounded-2xl border border-border bg-surface p-5">
+                <summary className="cursor-pointer font-medium">Not eligible ({ineligible.length})</summary>
+                <ul className="mt-3 flex flex-col gap-2 text-sm">
+                  {ineligible.map((m) => (
+                    <li key={m.scheme.id}>
+                      <strong>{m.scheme.name}:</strong> {m.failed.map(describeCheck).join(' ')}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+
+            <p className="text-xs text-muted">
+              Results are based on published eligibility rules, which can change. Always confirm on the official
+              website before applying. Scheme Saathi is not a government service.
+            </p>
+          </section>
+        ) : (
+          <SchemeCatalogue schemes={initial.catalogue} />
+        )}
+      </aside>
+
+      {/* Phones: switch between the two panels. */}
+      <nav
+        aria-label="Switch view"
+        className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-2 border-t border-border bg-surface lg:hidden"
+      >
+        {(['chat', 'schemes'] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            aria-pressed={tab === t}
+            className={`py-3.5 font-semibold ${tab === t ? 'border-t-2 border-accent text-accent' : 'text-muted'}`}
+          >
+            {t === 'chat' ? '💬 Chat' : `📋 Schemes${result ? ` (${eligible.length})` : ''}`}
+          </button>
+        ))}
+      </nav>
 
       {confirmingDelete && (
         <DeleteDataDialog

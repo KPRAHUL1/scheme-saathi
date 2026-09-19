@@ -1,4 +1,5 @@
 import { loadAccount } from '@/lib/account'
+import { loadSchemes } from '@/lib/catalogue'
 import { findOwnedRun, runToMatchResponse, savedExplanation } from '@/lib/runs'
 import { getUser, type SessionUser } from '@/lib/session'
 import { Saathi, type InitialState } from './_components/saathi'
@@ -11,7 +12,8 @@ export default async function Home() {
   const initial = user ? await loadInitialState(user) : null
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
+    // Wide for the two-column app; the welcome screen stays narrow and focused.
+    <main className={`mx-auto w-full flex-1 px-4 py-8 sm:py-12 ${initial ? 'max-w-6xl' : 'max-w-2xl'}`}>
       <header className="mb-8">
         <p className="text-sm font-semibold text-accent">Scheme Saathi · योजना साथी</p>
         <h1 className="mt-1 text-3xl font-bold leading-tight sm:text-4xl">
@@ -32,9 +34,13 @@ async function loadInitialState(user: SessionUser): Promise<InitialState | null>
   const active = account.profiles[0]
   if (!active) return null
 
-  const run = active.latestRunId ? await findOwnedRun(user.id, active.latestRunId) : null
+  const [run, catalogue] = await Promise.all([
+    active.latestRunId ? findOwnedRun(user.id, active.latestRunId) : null,
+    loadSchemes(),
+  ])
   return {
     account,
+    catalogue,
     activeProfileId: active.id,
     result: run ? runToMatchResponse(run) : null,
     explanation: run ? savedExplanation(run, run.language) : null,
