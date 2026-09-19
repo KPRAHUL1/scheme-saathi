@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
   try {
     const { message, audio } = body.data
-    const { facts, language, transcript } = await getLLM().json({
+    const { facts, language, transcript } = await getLLM({ audio: Boolean(audio) }).json({
       system: SYSTEM,
       prompt: message ?? 'The message is in the attached audio recording.',
       schema: Extraction,

@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/bedrock-sdk": "^0.33.6",
     "@anthropic-ai/sdk": "^0.126.0",
+    "@aws-sdk/client-polly": "^3.1134.0",
     "@google/genai": "^2.23.0",
     "@saathi/core": "*",
     "@saathi/db": "*",

@@ -1,15 +1,29 @@
+import { betaRefusalFallbackMiddleware } from '@anthropic-ai/sdk'
+import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
+import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
 import { GoogleGenAI } from '@google/genai'
 import { z } from 'zod'
 
 /**
  * The only file that knows which AI vendor we use. Routes ask for a JSON
- * object matching a zod schema; nothing else leaks out. Adding Bedrock later
- * means one more branch in getLLM(), with no route changes.
+ * object matching a zod schema; nothing else leaks out.
+ *
+ * LLM_PROVIDER picks the vendor for text. Voice always uses Gemini, because
+ * Claude on Bedrock does not accept audio input.
  */
 export type Audio = { data: string; mimeType: string }
 
+/** How hard the model should think. Both of our tasks are simple, so low by default. */
+export type Effort = 'low' | 'medium' | 'high'
+
 export interface LLM {
-  json<T>(args: { system: string; prompt: string; schema: z.ZodType<T>; audio?: Audio }): Promise<T>
+  json<T>(args: {
+    system: string
+    prompt: string
+    schema: z.ZodType<T>
+    audio?: Audio
+    effort?: Effort
+  }): Promise<T>
 }
 
 export class LLMError extends Error {}
@@ -59,15 +73,66 @@ function gemini(): LLM {
   }
 }
 
-let cached: LLM | undefined
+/**
+ * Claude on Amazon Bedrock. Authenticates with the AWS credentials in the
+ * environment (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION) and is
+ * billed to that AWS account: no Anthropic API key involved.
+ */
+function bedrock(): LLM {
+  const client = new AnthropicBedrockMantle({
+    awsRegion: process.env.AWS_REGION || 'us-east-1',
+    // Stay inside the routes' 60s maxDuration so the UI can still fall back.
+    timeout: 50_000,
+    maxRetries: 1,
+    // Server-side refusal fallbacks aren't available on Bedrock, so the SDK's
+    // client-side middleware re-runs a declined request on another model.
+    middleware: [betaRefusalFallbackMiddleware([{ model: 'anthropic.claude-opus-4-8' }])],
+  })
+  const model = process.env.BEDROCK_MODEL || 'anthropic.claude-opus-5'
 
-export function getLLM(): LLM {
-  if (cached) return cached
-  const provider = process.env.LLM_PROVIDER ?? 'gemini'
+  return {
+    async json({ system, prompt, schema, audio, effort = 'low' }) {
+      if (audio) throw new LLMError('Claude on Bedrock does not accept audio; use the Gemini provider for voice')
+
+      const response = await client.beta.messages.parse({
+        model,
+        max_tokens: 16_000,
+        system,
+        messages: [{ role: 'user', content: prompt }],
+        thinking: { type: 'adaptive' },
+        output_config: { effort, format: betaZodOutputFormat(schema) },
+      })
+
+      // Check why it stopped before trusting the output.
+      if (response.stop_reason === 'refusal') throw new LLMError('Model declined the request')
+      if (response.stop_reason === 'max_tokens') throw new LLMError('Model output was cut off')
+      if (!response.parsed_output) throw new LLMError('Model output did not match the schema')
+      return response.parsed_output
+    },
+  }
+}
+
+const cached = new Map<string, LLM>()
+
+function create(provider: string): LLM {
+  const existing = cached.get(provider)
+  if (existing) return existing
+  let llm: LLM
   switch (provider) {
     case 'gemini':
-      return (cached = gemini())
+      llm = gemini()
+      break
+    case 'bedrock':
+      llm = bedrock()
+      break
     default:
-      throw new LLMError(`LLM_PROVIDER "${provider}" is not implemented yet (available: gemini)`)
+      throw new LLMError(`LLM_PROVIDER "${provider}" is not supported (use "bedrock" or "gemini")`)
   }
+  cached.set(provider, llm)
+  return llm
+}
+
+export function getLLM({ audio = false }: { audio?: boolean } = {}): LLM {
+  // Claude on Bedrock takes text and images only, so recordings go to Gemini.
+  return create(audio ? 'gemini' : process.env.LLM_PROVIDER ?? 'gemini')
 }
