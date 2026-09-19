@@ -28,6 +28,12 @@ model Scheme {
   documents     String[]
   applyUrl      String
   sourceUrl     String
+  /// One of APPLY_METHODS in @saathi/core. Defaults exist only so the column
+  /// could be added to existing rows; the seed always sets real values.
+  applyMethod   String    @default("online")
+  applySteps    String    @default("")
+  /// { label, url }[] of verified official form PDFs.
+  forms         Json      @default("[]")
   /// null = not yet checked against the official portal. The UI badges these.
   verifiedOn    DateTime? @db.Date
   createdAt     DateTime  @default(now())

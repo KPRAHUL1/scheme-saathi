@@ -1,6 +1,7 @@
 import type { ExplainedScheme, MatchItem } from '@/lib/api'
-import { describeCheck, FIELD_LABELS } from '@/lib/labels'
+import { APPLY_METHOD_LABELS, describeCheck, FIELD_LABELS } from '@/lib/labels'
 import type { Speaker } from '@/lib/speech'
+import { DownloadIcon } from './icons'
 import { SpeakButton } from './speak-button'
 
 const TONE = {
@@ -96,18 +97,37 @@ export function ResultCard({
         </ul>
       </details>
 
-      {explained?.nextStep && (
-        <p className="mt-3 text-sm" lang={language}>{explained.nextStep}</p>
-      )}
-
-      <a
-        href={scheme.applyUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 inline-block rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:opacity-90"
-      >
-        Official website ↗
-      </a>
+      <section className="mt-4 rounded-xl border border-border bg-surface p-3" aria-label={`How to apply for ${scheme.name}`}>
+        <h4 className="text-sm font-semibold">
+          How to apply <span className="font-normal text-muted">· {APPLY_METHOD_LABELS[scheme.applyMethod].en}</span>
+        </h4>
+        <p className="mt-1 text-sm leading-relaxed" lang={explained?.nextStep ? language : 'en'}>
+          {explained?.nextStep ?? scheme.applySteps}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {/* Only official PDFs that were checked to exist; many schemes have none. */}
+          {scheme.forms.map((f) => (
+            <a
+              key={f.url}
+              href={f.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground hover:opacity-90"
+            >
+              <DownloadIcon />
+              Official form: {f.label}
+            </a>
+          ))}
+          <a
+            href={scheme.applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center rounded-lg border border-border px-3 py-2 text-sm font-medium hover:border-accent"
+          >
+            Official website ↗
+          </a>
+        </div>
+      </section>
     </article>
   )
 }

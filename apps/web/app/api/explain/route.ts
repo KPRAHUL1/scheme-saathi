@@ -37,7 +37,7 @@ For each scheme:
 - why: one or two sentences on what the person gets and why they match, based on the rules that passed.
 - gap: only for status "near_miss", say kindly which single rule they missed and by how much, using the actual value. Otherwise null.
 - documents: the documents list, in the target language.
-- nextStep: one concrete action, e.g. where to apply.
+- nextStep: the scheme's applySteps, rewritten simply in the target language. Keep the names of places and portals recognisable (CSC, Gram Panchayat, post office, bank). Do not invent steps, forms or websites that are not in applySteps.
 
 intro: one or two encouraging sentences summarising the result.
 Also say that details should be confirmed on the official website, because rules change.
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
     benefitAmount: r.scheme.benefitAmount,
     documents: r.scheme.documents,
     applyUrl: r.scheme.applyUrl,
+    applySteps: r.scheme.applySteps,
     checks: r.checks,
   }))
 
