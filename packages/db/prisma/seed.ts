@@ -72,6 +72,9 @@ async function write(
         documents: s.documents,
         applyUrl: s.applyUrl,
         sourceUrl: s.sourceUrl,
+        applyMethod: s.applyMethod,
+        applySteps: s.applySteps,
+        forms: s.forms as unknown as Prisma.InputJsonValue,
         verifiedOn: s.verifiedOn ? new Date(s.verifiedOn) : null,
       }
       return prisma.scheme.upsert({

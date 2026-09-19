@@ -6,13 +6,28 @@
     "benefit": "Direct income support paid straight into your bank account in three equal instalments each year.",
     "benefitAmount": "₹6,000 per year",
     "predicates": [
-      { "field": "occupation", "in": ["farmer"] },
-      { "field": "landHectares", "max": 2 }
+      {
+        "field": "occupation",
+        "in": [
+          "farmer"
+        ]
+      },
+      {
+        "field": "landHectares",
+        "max": 2
+      }
     ],
-    "documents": ["Aadhaar card", "Land records (khatauni / RoR)", "Bank account passbook"],
-    "applyUrl": "https://pmkisan.gov.in/",
-    "sourceUrl": "https://pmkisan.gov.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Land records (khatauni / RoR)",
+      "Bank account passbook"
+    ],
+    "applyUrl": "https://pmkisan.gov.in/RegistrationFormupdated.aspx",
+    "sourceUrl": "https://pmkisan.gov.in/RegistrationFormupdated.aspx",
+    "verifiedOn": null,
+    "applyMethod": "online",
+    "applySteps": "Register online on the PM-KISAN portal (New Farmer Registration) with your Aadhaar, or visit your nearest Common Service Centre (CSC). Your state checks your land records before payments start.",
+    "forms": []
   },
   {
     "id": "pmjay",
@@ -21,12 +36,22 @@
     "benefit": "Cashless hospital treatment at empanelled government and private hospitals for your whole family.",
     "benefitAmount": "₹5,00,000 per family per year",
     "predicates": [
-      { "field": "annualIncome", "max": 250000 }
+      {
+        "field": "annualIncome",
+        "max": 250000
+      }
     ],
-    "documents": ["Aadhaar card", "Ration card", "SECC / eligibility slip"],
-    "applyUrl": "https://pmjay.gov.in/",
-    "sourceUrl": "https://pmjay.gov.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Ration card",
+      "SECC / eligibility slip"
+    ],
+    "applyUrl": "https://beneficiary.nha.gov.in/",
+    "sourceUrl": "https://beneficiary.nha.gov.in/",
+    "verifiedOn": null,
+    "applyMethod": "csc",
+    "applySteps": "There is no application form. Check whether your family is on the list at beneficiary.nha.gov.in or in the Ayushman app, then get your free Ayushman card at a Common Service Centre (CSC) or the Ayushman desk of any empanelled hospital.",
+    "forms": []
   },
   {
     "id": "pmay-gramin",
@@ -35,13 +60,27 @@
     "benefit": "Financial assistance to build a permanent house if you currently live in a kutcha or damaged home.",
     "benefitAmount": "₹1,20,000 (₹1,30,000 in hilly areas)",
     "predicates": [
-      { "field": "isRural", "eq": true },
-      { "field": "annualIncome", "max": 300000 }
+      {
+        "field": "isRural",
+        "eq": true
+      },
+      {
+        "field": "annualIncome",
+        "max": 300000
+      }
     ],
-    "documents": ["Aadhaar card", "Bank account passbook", "MGNREGA job card", "SECC listing"],
-    "applyUrl": "https://pmayg.nic.in/",
-    "sourceUrl": "https://pmayg.nic.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Bank account passbook",
+      "MGNREGA job card",
+      "SECC listing"
+    ],
+    "applyUrl": "https://pmayg.dord.gov.in/",
+    "sourceUrl": "https://pmayg.dord.gov.in/",
+    "verifiedOn": null,
+    "applyMethod": "list_based",
+    "applySteps": "You cannot apply with a form. Households are chosen from government survey lists (SECC 2011 and Awaas+) and approved by the Gram Sabha. Ask your Gram Panchayat whether your household is on the list.",
+    "forms": []
   },
   {
     "id": "pmay-urban",
@@ -50,13 +89,27 @@
     "benefit": "Interest subsidy on a home loan for buying or building your first house in a town or city.",
     "benefitAmount": "Up to ₹2,67,000 interest subsidy",
     "predicates": [
-      { "field": "isRural", "eq": false },
-      { "field": "annualIncome", "max": 600000 }
+      {
+        "field": "isRural",
+        "eq": false
+      },
+      {
+        "field": "annualIncome",
+        "max": 600000
+      }
     ],
-    "documents": ["Aadhaar card", "Income certificate", "Property documents", "Bank loan sanction letter"],
-    "applyUrl": "https://pmay-urban.gov.in/",
-    "sourceUrl": "https://pmay-urban.gov.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Income certificate",
+      "Property documents",
+      "Bank loan sanction letter"
+    ],
+    "applyUrl": "https://pmaymis.gov.in/",
+    "sourceUrl": "https://pmaymis.gov.in/",
+    "verifiedOn": null,
+    "applyMethod": "online",
+    "applySteps": "Apply online on the PMAY-Urban 2.0 portal with your Aadhaar, or ask at your city or town municipal office.",
+    "forms": []
   },
   {
     "id": "sukanya-samriddhi",
@@ -65,13 +118,31 @@
     "benefit": "A high-interest savings account for a girl child, with tax-free returns at maturity.",
     "benefitAmount": "8.2% annual interest, tax free",
     "predicates": [
-      { "field": "gender", "eq": "female" },
-      { "field": "age", "max": 10 }
+      {
+        "field": "gender",
+        "eq": "female"
+      },
+      {
+        "field": "age",
+        "max": 10
+      }
     ],
-    "documents": ["Birth certificate of the girl child", "Guardian Aadhaar and PAN", "Address proof"],
+    "documents": [
+      "Birth certificate of the girl child",
+      "Guardian Aadhaar and PAN",
+      "Address proof"
+    ],
     "applyUrl": "https://www.indiapost.gov.in/",
     "sourceUrl": "https://www.nsiindia.gov.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "post_office",
+    "applySteps": "Open the account at any post office or authorised bank with the girl's birth certificate and a parent's Aadhaar and PAN. Form-1 is the official account-opening form.",
+    "forms": [
+      {
+        "label": "Form-1: account opening",
+        "url": "https://www.nsiindia.gov.in/writereaddata/FileUploads/FORM1.pdf"
+      }
+    ]
   },
   {
     "id": "ujjwala",
@@ -80,14 +151,40 @@
     "benefit": "A free LPG gas connection with the deposit waived, so you no longer have to cook on firewood.",
     "benefitAmount": "Free connection + ₹1,600 deposit waiver",
     "predicates": [
-      { "field": "gender", "eq": "female" },
-      { "field": "age", "min": 18 },
-      { "field": "annualIncome", "max": 200000 }
+      {
+        "field": "gender",
+        "eq": "female"
+      },
+      {
+        "field": "age",
+        "min": 18
+      },
+      {
+        "field": "annualIncome",
+        "max": 200000
+      }
     ],
-    "documents": ["Aadhaar card", "Ration card", "Bank account passbook", "BPL certificate"],
+    "documents": [
+      "Aadhaar card",
+      "Ration card",
+      "Bank account passbook",
+      "BPL certificate"
+    ],
     "applyUrl": "https://www.pmuy.gov.in/",
     "sourceUrl": "https://www.pmuy.gov.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "office",
+    "applySteps": "Fill the Ujjwala KYC form and submit it at your nearest LPG distributor (Indane, HP Gas or Bharat Gas) with your Aadhaar and ration card. You can also apply online on pmuy.gov.in.",
+    "forms": [
+      {
+        "label": "KYC form (English)",
+        "url": "https://www.pmuy.gov.in/documents/Ujjwala-KYC_englishnew.pdf"
+      },
+      {
+        "label": "KYC फ़ॉर्म (हिंदी)",
+        "url": "https://www.pmuy.gov.in/documents/Ujjwala-KYC_hindinew.pdf"
+      }
+    ]
   },
   {
     "id": "mudra",
@@ -96,13 +193,37 @@
     "benefit": "A collateral-free business loan to start or grow a small non-farm enterprise.",
     "benefitAmount": "Up to ₹20,00,000",
     "predicates": [
-      { "field": "age", "min": 18 },
-      { "field": "occupation", "in": ["self_employed", "unemployed", "labourer", "other"] }
+      {
+        "field": "age",
+        "min": 18
+      },
+      {
+        "field": "occupation",
+        "in": [
+          "self_employed",
+          "unemployed",
+          "labourer",
+          "other"
+        ]
+      }
     ],
-    "documents": ["Aadhaar card", "PAN card", "Business plan or quotation", "Bank statements"],
-    "applyUrl": "https://www.mudra.org.in/",
-    "sourceUrl": "https://www.mudra.org.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "PAN card",
+      "Business plan or quotation",
+      "Bank statements"
+    ],
+    "applyUrl": "https://www.udyamimitra.in/",
+    "sourceUrl": "https://www.udyamimitra.in/",
+    "verifiedOn": null,
+    "applyMethod": "bank",
+    "applySteps": "Apply at any bank, regional rural bank, small finance bank or microfinance lender, or online on the Udyami Mitra portal. Most lenders accept the common MUDRA loan application form.",
+    "forms": [
+      {
+        "label": "Common loan application form",
+        "url": "https://www.mudra.org.in/Default/DownloadFile/Common_loan_Application_form.pdf"
+      }
+    ]
   },
   {
     "id": "nsp-post-matric",
@@ -111,14 +232,38 @@
     "benefit": "Covers tuition fees plus a monthly maintenance allowance for studies after Class 10.",
     "benefitAmount": "Full tuition + up to ₹1,200 per month",
     "predicates": [
-      { "field": "occupation", "in": ["student"] },
-      { "field": "category", "in": ["sc", "st", "obc"] },
-      { "field": "annualIncome", "max": 250000 }
+      {
+        "field": "occupation",
+        "in": [
+          "student"
+        ]
+      },
+      {
+        "field": "category",
+        "in": [
+          "sc",
+          "st",
+          "obc"
+        ]
+      },
+      {
+        "field": "annualIncome",
+        "max": 250000
+      }
     ],
-    "documents": ["Caste certificate", "Income certificate", "Previous marksheet", "Bank passbook", "Aadhaar card"],
+    "documents": [
+      "Caste certificate",
+      "Income certificate",
+      "Previous marksheet",
+      "Bank passbook",
+      "Aadhaar card"
+    ],
     "applyUrl": "https://scholarships.gov.in/",
     "sourceUrl": "https://scholarships.gov.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "online",
+    "applySteps": "Apply online on the National Scholarship Portal, or your state's scholarship portal, using your One Time Registration (OTR) number made with Aadhaar. Check your state's last date.",
+    "forms": []
   },
   {
     "id": "atal-pension",
@@ -127,12 +272,28 @@
     "benefit": "A guaranteed monthly pension after you turn 60, funded by small monthly contributions now.",
     "benefitAmount": "₹1,000 to ₹5,000 per month after 60",
     "predicates": [
-      { "field": "age", "min": 18, "max": 40 }
+      {
+        "field": "age",
+        "min": 18,
+        "max": 40
+      }
     ],
-    "documents": ["Aadhaar card", "Savings bank account", "Mobile number"],
-    "applyUrl": "https://www.npscra.nsdl.co.in/scheme-details.php",
-    "sourceUrl": "https://www.npscra.nsdl.co.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Savings bank account",
+      "Mobile number"
+    ],
+    "applyUrl": "https://pfrda.org.in/w/apy-subscriber-registration-form-english",
+    "sourceUrl": "https://pfrda.org.in/w/apy-subscriber-registration-form-english",
+    "verifiedOn": null,
+    "applyMethod": "bank",
+    "applySteps": "Join at the bank or post office where you have a savings account, or through net banking. Submit the APY registration form; your monthly contribution is auto-debited.",
+    "forms": [
+      {
+        "label": "APY registration form (English)",
+        "url": "https://pfrda.org.in/documents/33652/252002/APY+Subscriber+Registration+Form+-+English.pdf"
+      }
+    ]
   },
   {
     "id": "pmsby",
@@ -141,12 +302,23 @@
     "benefit": "Accident insurance cover for death or permanent disability, at a premium of ₹20 a year.",
     "benefitAmount": "₹2,00,000 cover for ₹20 per year",
     "predicates": [
-      { "field": "age", "min": 18, "max": 70 }
+      {
+        "field": "age",
+        "min": 18,
+        "max": 70
+      }
     ],
-    "documents": ["Aadhaar card", "Savings bank account", "Consent form at your bank"],
-    "applyUrl": "https://jansuraksha.gov.in/",
-    "sourceUrl": "https://jansuraksha.gov.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Savings bank account",
+      "Consent form at your bank"
+    ],
+    "applyUrl": "https://www.indiapost.gov.in/insurance-services/pmsby",
+    "sourceUrl": "https://www.indiapost.gov.in/insurance-services/pmsby",
+    "verifiedOn": null,
+    "applyMethod": "bank",
+    "applySteps": "Enrol at the bank or post office where you have a savings account, or through net or mobile banking. The ₹20 premium is auto-debited once a year.",
+    "forms": []
   },
   {
     "id": "pmjjby",
@@ -155,12 +327,23 @@
     "benefit": "Life insurance cover for your family, at a premium of ₹436 a year.",
     "benefitAmount": "₹2,00,000 life cover",
     "predicates": [
-      { "field": "age", "min": 18, "max": 50 }
+      {
+        "field": "age",
+        "min": 18,
+        "max": 50
+      }
     ],
-    "documents": ["Aadhaar card", "Savings bank account", "Nominee details"],
-    "applyUrl": "https://jansuraksha.gov.in/",
-    "sourceUrl": "https://jansuraksha.gov.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Savings bank account",
+      "Nominee details"
+    ],
+    "applyUrl": "https://www.indiapost.gov.in/insurance-services/pmjjby",
+    "sourceUrl": "https://www.indiapost.gov.in/insurance-services/pmjjby",
+    "verifiedOn": null,
+    "applyMethod": "bank",
+    "applySteps": "Enrol at the bank or post office where you have a savings account, or through net or mobile banking. The ₹436 premium is auto-debited once a year.",
+    "forms": []
   },
   {
     "id": "pmmvy",
@@ -169,14 +352,31 @@
     "benefit": "Cash support during pregnancy for your first living child, to make up for lost wages.",
     "benefitAmount": "₹5,000 in instalments",
     "predicates": [
-      { "field": "gender", "eq": "female" },
-      { "field": "age", "min": 19 },
-      { "field": "annualIncome", "max": 800000 }
+      {
+        "field": "gender",
+        "eq": "female"
+      },
+      {
+        "field": "age",
+        "min": 19
+      },
+      {
+        "field": "annualIncome",
+        "max": 800000
+      }
     ],
-    "documents": ["Aadhaar card", "MCP card", "Bank account passbook", "Aadhaar of husband"],
+    "documents": [
+      "Aadhaar card",
+      "MCP card",
+      "Bank account passbook",
+      "Aadhaar of husband"
+    ],
     "applyUrl": "https://pmmvy.wcd.gov.in/",
     "sourceUrl": "https://pmmvy.wcd.gov.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "online",
+    "applySteps": "Register through your nearest Anganwadi worker or health centre, or online on the PMMVY portal, soon after your pregnancy is registered.",
+    "forms": []
   },
   {
     "id": "stand-up-india",
@@ -185,13 +385,31 @@
     "benefit": "A bank loan to set up a new manufacturing, services or trading business.",
     "benefitAmount": "₹10,00,000 to ₹1,00,00,000",
     "predicates": [
-      { "field": "age", "min": 18 },
-      { "field": "category", "in": ["sc", "st"] }
+      {
+        "field": "age",
+        "min": 18
+      },
+      {
+        "field": "category",
+        "in": [
+          "sc",
+          "st"
+        ]
+      }
     ],
-    "documents": ["Aadhaar card", "PAN card", "Caste certificate", "Project report", "Business address proof"],
+    "documents": [
+      "Aadhaar card",
+      "PAN card",
+      "Caste certificate",
+      "Project report",
+      "Business address proof"
+    ],
     "applyUrl": "https://www.standupmitra.in/",
     "sourceUrl": "https://www.standupmitra.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "online",
+    "applySteps": "Register on the Stand-Up India portal and choose up to 3 banks, or apply directly at a bank branch or through your district's Lead District Manager.",
+    "forms": []
   },
   {
     "id": "pm-vishwakarma",
@@ -200,13 +418,31 @@
     "benefit": "Skill training with a daily stipend, a toolkit grant, and a collateral-free loan for traditional artisans.",
     "benefitAmount": "₹15,000 toolkit grant + loans up to ₹3,00,000",
     "predicates": [
-      { "field": "age", "min": 18 },
-      { "field": "occupation", "in": ["self_employed", "labourer", "other"] }
+      {
+        "field": "age",
+        "min": 18
+      },
+      {
+        "field": "occupation",
+        "in": [
+          "self_employed",
+          "labourer",
+          "other"
+        ]
+      }
     ],
-    "documents": ["Aadhaar card", "Bank account passbook", "Ration card", "Proof of trade"],
+    "documents": [
+      "Aadhaar card",
+      "Bank account passbook",
+      "Ration card",
+      "Proof of trade"
+    ],
     "applyUrl": "https://pmvishwakarma.gov.in/",
     "sourceUrl": "https://pmvishwakarma.gov.in/",
-    "verifiedOn": null
+    "verifiedOn": null,
+    "applyMethod": "csc",
+    "applySteps": "Register free at your nearest Common Service Centre (CSC) with your Aadhaar and mobile number. Your Gram Panchayat or town office checks your trade before approval.",
+    "forms": []
   },
   {
     "id": "nsap-old-age",
@@ -215,12 +451,26 @@
     "benefit": "A monthly pension paid to elderly people from below-poverty-line households.",
     "benefitAmount": "₹200 to ₹500 per month",
     "predicates": [
-      { "field": "age", "min": 60 },
-      { "field": "annualIncome", "max": 100000 }
+      {
+        "field": "age",
+        "min": 60
+      },
+      {
+        "field": "annualIncome",
+        "max": 100000
+      }
     ],
-    "documents": ["Aadhaar card", "Age proof", "BPL certificate", "Bank account passbook"],
-    "applyUrl": "https://nsap.nic.in/",
-    "sourceUrl": "https://nsap.nic.in/",
-    "verifiedOn": null
+    "documents": [
+      "Aadhaar card",
+      "Age proof",
+      "BPL certificate",
+      "Bank account passbook"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/schemes/nsap-ignoaps",
+    "sourceUrl": "https://www.myscheme.gov.in/schemes/nsap-ignoaps",
+    "verifiedOn": null,
+    "applyMethod": "office",
+    "applySteps": "Apply at your Gram Panchayat (villages) or municipal office (towns) with proof of age, your BPL card and photos. Some states also accept applications online or through the SAMBAL app.",
+    "forms": []
   }
 ]

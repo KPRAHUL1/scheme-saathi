@@ -1,5 +1,6 @@
 import {
   STATE_NAMES,
+  type APPLY_METHODS,
   type CATEGORIES,
   type Check,
   type GENDERS,
@@ -57,6 +58,15 @@ export const OCCUPATION_LABELS: Record<(typeof OCCUPATIONS)[number], string> = {
   unemployed: 'Looking for work',
   homemaker: 'Homemaker',
   other: 'Other',
+}
+
+export const APPLY_METHOD_LABELS: Record<(typeof APPLY_METHODS)[number], { en: string; hi: string }> = {
+  online: { en: 'Apply online', hi: 'ऑनलाइन आवेदन करें' },
+  csc: { en: 'At a Common Service Centre (CSC)', hi: 'जन सेवा केंद्र (CSC) पर' },
+  bank: { en: 'At your bank or post office', hi: 'अपने बैंक या डाकघर में' },
+  post_office: { en: 'At a post office or bank', hi: 'डाकघर या बैंक में' },
+  office: { en: 'At a local office', hi: 'स्थानीय कार्यालय में' },
+  list_based: { en: 'No form: chosen from a government list', hi: 'कोई फ़ॉर्म नहीं: सरकारी सूची से चयन' },
 }
 
 export const QUESTIONS: Record<ProfileField, string> = {

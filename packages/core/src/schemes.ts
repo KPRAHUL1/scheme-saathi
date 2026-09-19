@@ -29,6 +29,13 @@ export const PredicateSchema = z.discriminatedUnion('field', [
 
 export type Predicate = z.infer<typeof PredicateSchema>
 
+/**
+ * How a person actually gets the benefit. Several big schemes have no form at
+ * all ("list_based": households are picked from government survey lists), so
+ * the app must never imply that downloading a form is always the way in.
+ */
+export const APPLY_METHODS = ['online', 'csc', 'bank', 'post_office', 'office', 'list_based'] as const
+
 export const SchemeSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, 'lowercase letters, digits and hyphens only'),
   name: z.string().min(1),
@@ -41,6 +48,14 @@ export const SchemeSchema = z.object({
   documents: z.array(z.string()),
   applyUrl: z.url(),
   sourceUrl: z.url(),
+  applyMethod: z.enum(APPLY_METHODS),
+  /** Plain-English steps to apply; the AI translates them for the user. */
+  applySteps: z.string().min(1),
+  /**
+   * Official downloadable forms. Only links checked to return a real PDF from
+   * a government site. Empty when the scheme has no form (online or list-based).
+   */
+  forms: z.array(z.object({ label: z.string().min(1), url: z.url() })),
   /**
    * ISO date a human checked this entry against the official portal.
    * null means UNVERIFIED — the UI must badge it as such. We would rather

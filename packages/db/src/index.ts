@@ -11,7 +11,13 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
  * DATABASE_URL just to compile — breaking CI and env-less preview builds.
  */
 export function getPrisma(): PrismaClient {
-  if (globalForPrisma.prisma) return globalForPrisma.prisma
+  const cached = globalForPrisma.prisma
+  // After `prisma generate`, dev hot reload loads a new PrismaClient class but
+  // globalThis still holds an instance of the old one, which doesn't know about
+  // new columns (they come back undefined). Only reuse a client built from the
+  // code that is loaded now; otherwise replace it.
+  if (cached instanceof PrismaClient) return cached
+  if (cached) void (cached as { $disconnect(): Promise<void> }).$disconnect().catch(() => {})
 
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {

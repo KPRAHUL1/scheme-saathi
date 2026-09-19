@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ProfileSchema, type ProfileField } from '@saathi/core'
 import type { ExplainedScheme, MatchItem } from '@/lib/api'
-import { describeCheck, FIELD_LABELS, formatValue } from '@/lib/labels'
+import { APPLY_METHOD_LABELS, describeCheck, FIELD_LABELS, formatValue } from '@/lib/labels'
+import { mySchemeStateLink } from '@/lib/myscheme'
 import { findOwnedRun, runToMatchResponse, savedExplanation } from '@/lib/runs'
 import { getUser } from '@/lib/session'
 import { PrintButton } from './print-button'
@@ -23,13 +24,16 @@ const TEXT = {
     close: 'Close:',
     stillNeeded: 'Still needed:',
     documents: 'Documents to bring',
-    apply: 'Where to apply',
+    apply: 'How to apply',
+    website: 'Official website',
+    form: 'Official form',
     unverified: 'Not yet verified against the official website.',
     none: 'No schemes matched yet. Add more details in Scheme Saathi and check again.',
     disclaimer:
       'Based on published eligibility rules, which can change. Confirm on the official website or at your nearest Common Service Centre (CSC) before applying. Scheme Saathi is not a government service.',
     save: 'Save as PDF',
     back: 'Back',
+    stateSchemes: (state: string) => `${state} government schemes (official myScheme portal)`,
   },
   hi: {
     title: 'मेरी सरकारी योजनाएँ',
@@ -42,13 +46,16 @@ const TEXT = {
     close: 'करीब:',
     stillNeeded: 'अभी चाहिए:',
     documents: 'साथ ले जाने वाले दस्तावेज़',
-    apply: 'कहाँ आवेदन करें',
+    apply: 'आवेदन कैसे करें',
+    website: 'आधिकारिक वेबसाइट',
+    form: 'आधिकारिक फ़ॉर्म',
     unverified: 'आधिकारिक वेबसाइट से अभी जाँचा नहीं गया।',
     none: 'अभी कोई योजना नहीं मिली। Scheme Saathi में और जानकारी जोड़कर फिर से जाँचें।',
     disclaimer:
       'यह प्रकाशित पात्रता नियमों पर आधारित है, जो बदल सकते हैं। आवेदन से पहले आधिकारिक वेबसाइट या नज़दीकी जन सेवा केंद्र (CSC) पर पुष्टि करें। Scheme Saathi सरकारी सेवा नहीं है।',
     save: 'PDF के रूप में सहेजें',
     back: 'वापस',
+    stateSchemes: (state: string) => `${state} सरकार की योजनाएँ (आधिकारिक myScheme पोर्टल)`,
   },
 }
 
@@ -71,6 +78,7 @@ export default async function ResultsDocument(props: PageProps<'/results/[runId]
   // The profile exactly as the decision saw it, not as it may have been edited since.
   const snapshot = ProfileSchema.parse(run.snapshot)
   const details = (Object.keys(snapshot) as ProfileField[]).filter((f) => snapshot[f] !== null)
+  const stateLink = mySchemeStateLink(snapshot.state)
   const date = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-IN', { dateStyle: 'long' }).format(run.createdAt)
 
   const groups = [
@@ -108,6 +116,12 @@ export default async function ResultsDocument(props: PageProps<'/results/[runId]
       {explanation?.intro && <p className="mt-4 leading-relaxed">{explanation.intro}</p>}
 
       {groups.length === 0 && <p className="mt-6">{t.none}</p>}
+
+      {stateLink && (
+        <p className="mt-6 text-sm leading-relaxed">
+          <strong>{t.stateSchemes(stateLink.name)}:</strong> <span className="break-all">{stateLink.url}</span>
+        </p>
+      )}
 
       {groups.map((g) => (
         <section key={g.title} className="mt-6">
@@ -162,11 +176,20 @@ function SchemeBlock({ item, explained, lang, t }: { item: MatchItem; explained?
         ))}
       </ul>
 
-      <p className="mt-3 text-sm">
-        <strong>{t.apply}:</strong>{' '}
-        {explained?.nextStep && <span lang={lang}>{explained.nextStep} </span>}
-        <span className="break-all">{scheme.applyUrl}</span>
+      <h4 className="mt-3 text-sm font-semibold">
+        {t.apply}: <span className="font-normal">{APPLY_METHOD_LABELS[scheme.applyMethod][lang === 'hi' ? 'hi' : 'en']}</span>
+      </h4>
+      <p className="mt-1 text-sm leading-relaxed" lang={explained?.nextStep ? lang : 'en'}>
+        {explained?.nextStep ?? scheme.applySteps}
       </p>
+      <p className="mt-1 text-sm">
+        {t.website}: <span className="break-all">{scheme.applyUrl}</span>
+      </p>
+      {scheme.forms.map((f) => (
+        <p key={f.url} className="mt-1 text-sm">
+          {t.form} ({f.label}): <span className="break-all">{f.url}</span>
+        </p>
+      ))}
       {!scheme.verifiedOn && <p className="mt-1 text-xs text-neutral-600">{t.unverified}</p>}
     </article>
   )

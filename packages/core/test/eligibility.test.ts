@@ -13,7 +13,7 @@ function scheme(predicates: Scheme['predicates']): Scheme {
   return {
     id: 'test', name: 'Test Scheme', ministry: 'Test', benefit: 'Test benefit',
     benefitAmount: null, predicates, documents: [], applyUrl: '', sourceUrl: '',
-    verifiedOn: null,
+    applyMethod: 'online', applySteps: 'Test steps', forms: [], verifiedOn: null,
   }
 }
 

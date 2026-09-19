@@ -13,7 +13,10 @@ import { DownloadIcon, MicIcon } from './icons'
 import { ProfileForm } from './profile-form'
 import { ProgressSteps, type Step, type StepState } from './progress-steps'
 import { ResultCard } from './result-card'
+import { DeleteDataDialog } from './delete-data-dialog'
+import { QuickProfile } from './quick-profile'
 import { SpeakButton } from './speak-button'
+import { StateSchemesCard } from './state-schemes-card'
 
 const EXAMPLES = [
   {
@@ -52,6 +55,8 @@ export type InitialState = {
   resultLanguage: string
 }
 
+const isBlank = (p: Profile) => Object.values(p).every((v) => v === null)
+
 const explainingStep = (language: string): Progress => ({
   steps: { understand: 'skipped', check: 'skipped', explain: 'active' },
   activeSince: timestamp(),
@@ -78,6 +83,10 @@ export function Saathi({ initial }: { initial: InitialState }) {
   const [explanation, setExplanation] = useState<ExplainResponse | null>(initial.explanation)
   const [explainFailed, setExplainFailed] = useState(false)
   const [adding, setAdding] = useState(false)
+  const uiLang = initial.account.language === 'hi' ? 'hi' : 'en'
+  // A brand-new person starts with simple step-by-step questions, not a blank chat box.
+  const [asking, setAsking] = useState(() => !initial.result && isBlank(profile))
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   // The newest run. A slow explanation for an older run must not overwrite it.
   const currentRun = useRef<string | null>(initial.result?.runId ?? null)
@@ -210,6 +219,7 @@ export function Saathi({ initial }: { initial: InitialState }) {
     setShowForm(false)
     setInput('')
     setProgress(null)
+    setAsking(!target.latestRunId && isBlank(target.profile))
     if (!target.latestRunId) return
 
     try {
@@ -241,18 +251,13 @@ export function Saathi({ initial }: { initial: InitialState }) {
     }
   }
 
+  /** Runs from the confirmation dialog; throws on failure so the dialog can say so. */
   async function deleteMyData() {
-    if (!window.confirm('Delete all saved details and results for everyone on this device? This cannot be undone.')) {
-      return
-    }
     recorder.cancel()
     speaker.stopAll()
-    try {
-      await api.deleteMyData()
-      router.refresh()
-    } catch {
-      setNotice("Couldn't delete your data right now. Please try again.")
-    }
+    await api.deleteMyData()
+    // The page re-renders on the server without a session: back to welcome.
+    router.refresh()
   }
 
   const known = (Object.keys(profile) as ProfileField[]).filter((f) => profile[f] !== null)
@@ -346,6 +351,20 @@ export function Saathi({ initial }: { initial: InitialState }) {
         )}
       </section>
 
+      {asking ? (
+        <QuickProfile
+          key={activeId}
+          initial={profile}
+          lang={uiLang}
+          speaker={speaker}
+          onDone={(p) => {
+            setAsking(false)
+            void check(p)
+          }}
+          onSkip={() => setAsking(false)}
+        />
+      ) : (
+      <>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -401,6 +420,17 @@ export function Saathi({ initial }: { initial: InitialState }) {
             >
               {showForm ? 'Hide form' : 'Fill a form instead'}
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForm(false)
+                setAsking(true)
+              }}
+              disabled={busy}
+              className="rounded-lg border border-border px-4 py-2.5 hover:bg-surface disabled:opacity-50"
+            >
+              Answer step by step
+            </button>
           </div>
         ) : (
           <div
@@ -436,22 +466,25 @@ export function Saathi({ initial }: { initial: InitialState }) {
         )}
       </form>
 
+      {/* Demo examples for judges, tucked away so real users see their own options first. */}
       {!result && !busy && (
-        <div>
-          <p className="mb-2 text-sm text-muted">Or try an example:</p>
-          <div className="flex flex-wrap gap-2">
+        <details className="text-sm">
+          <summary className="cursor-pointer text-muted">Try an example</summary>
+          <div className="mt-2 flex flex-wrap gap-2">
             {EXAMPLES.map((ex) => (
               <button
                 key={ex.label}
                 type="button"
                 onClick={() => void send(ex.text)}
-                className="rounded-full border border-border bg-surface px-4 py-1.5 text-sm hover:border-accent"
+                className="rounded-full border border-border bg-surface px-4 py-1.5 hover:border-accent"
               >
                 {ex.label}
               </button>
             ))}
           </div>
-        </div>
+        </details>
+      )}
+      </>
       )}
 
       <div aria-live="polite" className="flex flex-col gap-3">
@@ -566,6 +599,8 @@ export function Saathi({ initial }: { initial: InitialState }) {
           <Group title="One more detail needed" items={byStatus('needs_info')} {...{ explainedById, explaining, language, speaker }} />
           <Group title="Close, worth checking" items={byStatus('near_miss')} {...{ explainedById, explaining, language, speaker }} />
 
+          <StateSchemesCard state={profile.state} lang={uiLang} />
+
           {ineligible.length > 0 && (
             <details className="rounded-2xl border border-border bg-surface p-5">
               <summary className="cursor-pointer font-medium">Not eligible ({ineligible.length})</summary>
@@ -588,10 +623,19 @@ export function Saathi({ initial }: { initial: InitialState }) {
 
       <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-muted">
         <p>Your details are saved securely and linked to this device.</p>
-        <button type="button" onClick={() => void deleteMyData()} className="text-danger underline">
+        <button type="button" onClick={() => setConfirmingDelete(true)} className="text-danger underline">
           Delete my data
         </button>
       </footer>
+
+      {confirmingDelete && (
+        <DeleteDataDialog
+          lang={uiLang}
+          people={profiles.length}
+          onCancel={() => setConfirmingDelete(false)}
+          onConfirm={deleteMyData}
+        />
+      )}
     </div>
   )
 }
