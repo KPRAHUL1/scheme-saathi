@@ -1,5 +1,6 @@
 'use client'
 
+import { Check, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export type StepState = 'pending' | 'active' | 'done' | 'skipped'
@@ -44,18 +45,13 @@ export function ProgressSteps({ steps, activeSince }: { steps: Step[]; activeSin
 function StepIcon({ state }: { state: StepState }) {
   if (state === 'done') {
     return (
-      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-eligible text-xs text-background" aria-label="done">
-        ✓
+      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-eligible text-background" aria-label="done">
+        <Check size={14} strokeWidth={3} aria-hidden />
       </span>
     )
   }
   if (state === 'active') {
-    return (
-      <span
-        className="size-5 shrink-0 animate-spin rounded-full border-2 border-border border-t-accent"
-        aria-label="in progress"
-      />
-    )
+    return <Loader2 size={20} className="shrink-0 animate-spin text-accent" aria-label="in progress" />
   }
   return <span className="size-5 shrink-0 rounded-full border-2 border-border" aria-label="waiting" />
 }

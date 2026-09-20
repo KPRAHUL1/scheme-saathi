@@ -1,7 +1,7 @@
 'use client'
 
+import { Square, Volume2 } from 'lucide-react'
 import type { Speaker } from '@/lib/speech'
-import { SpeakerIcon, StopIcon } from './icons'
 
 /** Hidden when the device has no voice for the language, rather than failing on tap. */
 export function SpeakButton({
@@ -27,7 +27,7 @@ export function SpeakButton({
         active ? 'border-accent bg-accent text-accent-foreground' : 'border-border bg-surface hover:border-accent'
       }`}
     >
-      {active ? <StopIcon /> : <SpeakerIcon />}
+      {active ? <Square size={16} aria-hidden /> : <Volume2 size={16} aria-hidden />}
       {active ? 'Stop' : 'Listen'}
     </button>
   )

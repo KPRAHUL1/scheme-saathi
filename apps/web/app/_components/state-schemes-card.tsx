@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react'
 import type { Profile } from '@saathi/core'
 import { mySchemeStateLink } from '@/lib/myscheme'
 
@@ -30,9 +31,10 @@ export function StateSchemesCard({ state, lang }: { state: Profile['state']; lan
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:opacity-90"
+        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:opacity-90"
       >
-        {t.button(link.name)} ↗
+        <ExternalLink size={16} aria-hidden />
+        {t.button(link.name)}
       </a>
     </section>
   )
