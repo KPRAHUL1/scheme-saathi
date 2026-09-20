@@ -1,7 +1,7 @@
+import { Download, ExternalLink } from 'lucide-react'
 import type { ExplainedScheme, MatchItem } from '@/lib/api'
 import { APPLY_METHOD_LABELS, describeCheck, FIELD_LABELS } from '@/lib/labels'
 import type { Speaker } from '@/lib/speech'
-import { DownloadIcon } from './icons'
 import { SpeakButton } from './speak-button'
 
 const TONE = {
@@ -114,7 +114,7 @@ export function ResultCard({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-foreground hover:opacity-90"
             >
-              <DownloadIcon />
+              <Download size={18} aria-hidden />
               Official form: {f.label}
             </a>
           ))}
@@ -122,9 +122,10 @@ export function ResultCard({
             href={scheme.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-lg border border-border px-3 py-2 text-sm font-medium hover:border-accent"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:border-accent"
           >
-            Official website ↗
+            <ExternalLink size={16} aria-hidden />
+            Official website
           </a>
         </div>
       </section>

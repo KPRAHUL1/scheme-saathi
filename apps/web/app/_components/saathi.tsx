@@ -6,15 +6,15 @@ import { EMPTY_PROFILE, mergeProfile, type Profile, type ProfileField, type Sche
 import {
   api, ApiError, type Account, type ClientProfile, type ExplainResponse, type MatchItem, type MatchResponse,
 } from '@/lib/api'
+import { ClipboardList, Download, MessageCircle, Mic } from 'lucide-react'
 import { describeCheck, FIELD_LABELS, formatValue, QUESTIONS, quickReplies } from '@/lib/labels'
 import { useRecorder } from '@/lib/recorder'
 import { useSpeaker, type Speaker } from '@/lib/speech'
-import { DownloadIcon, MicIcon } from './icons'
+import { DeleteDataDialog } from './delete-data-dialog'
 import { ProfileForm } from './profile-form'
 import { ProgressSteps, type Step, type StepState } from './progress-steps'
 import { ResultCard } from './result-card'
 import { SchemeCatalogue } from './scheme-catalogue'
-import { DeleteDataDialog } from './delete-data-dialog'
 import { QuickProfile } from './quick-profile'
 import { SpeakButton } from './speak-button'
 import { StateSchemesCard } from './state-schemes-card'
@@ -421,7 +421,7 @@ export function Saathi({ initial }: { initial: InitialState }) {
                   disabled={busy}
                   className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 hover:border-accent disabled:opacity-50"
                 >
-                  <MicIcon />
+                  <Mic size={18} aria-hidden />
                   Speak
                 </button>
               )}
@@ -617,7 +617,7 @@ export function Saathi({ initial }: { initial: InitialState }) {
                   rel="noopener"
                   className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 font-medium hover:border-accent"
                 >
-                  <DownloadIcon />
+                  <Download size={18} aria-hidden />
                   Download my schemes (PDF)
                 </a>
               )}
@@ -663,9 +663,21 @@ export function Saathi({ initial }: { initial: InitialState }) {
             type="button"
             onClick={() => setTab(t)}
             aria-pressed={tab === t}
-            className={`py-3.5 font-semibold ${tab === t ? 'border-t-2 border-accent text-accent' : 'text-muted'}`}
+            className={`flex items-center justify-center gap-2 py-3.5 font-semibold ${
+              tab === t ? 'border-t-2 border-accent text-accent' : 'text-muted'
+            }`}
           >
-            {t === 'chat' ? '💬 Chat' : `📋 Schemes${result ? ` (${eligible.length})` : ''}`}
+            {t === 'chat' ? (
+              <>
+                <MessageCircle size={18} aria-hidden />
+                Chat
+              </>
+            ) : (
+              <>
+                <ClipboardList size={18} aria-hidden />
+                Schemes{result ? ` (${eligible.length})` : ''}
+              </>
+            )}
           </button>
         ))}
       </nav>
